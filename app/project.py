@@ -6,14 +6,14 @@ from flask import (
     Flask, abort, redirect, render_template, make_response,
     request, url_for, flash, jsonify, session as login_session
 )
+import httplib2
+import json
 from models import Base, Category, MenuItem, User
+from oauth2client.client import OAuth2WebServerFlow, FlowExchangeError
+import string
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 import random
-import string
-from oauth2client.client import OAuth2WebServerFlow, FlowExchangeError
-import httplib2
-import json
 import requests
 
 
@@ -28,7 +28,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Home page"
+    return render_template('main.html')
+
 
 @app.route('/login', methods=['GET'])
 def login():
@@ -54,29 +55,25 @@ def fbconnect():
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    access_token = request.data
+    access_token = request.data.decode('utf-8')
     print("access token received %s " % access_token)
 
     app_id = config.FB_APP_ID
     app_secret = config.FB_APP_SECRET
 
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token'
-    url += '&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+    url = 'https://graph.facebook.com/oauth/access_token'
+    url += '?grant_type=fb_exchange_token'
+    url += "&client_id={}&client_secret={}&fb_exchange_token={}".format(
+        app_id, app_secret, access_token
+    )
+
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
+    result = json.loads(result)
+    token = result['access_token']
 
     # Use token to get user info from API
     userinfo_url = "https://graph.facebook.com/{}/me".format(config.FB_VERSION)
-    """
-        Due to the formatting for the result from the server token exchange we
-        have to split the token first on commas and select the first index
-        which gives us the key : value for the server access token then we
-        split it on colons to pull out the actual token value and replace the
-        remaining quotes with nothing so that it can be used directly in the
-        graph api calls
-    """
-    token = result.split(',')[0].split(':')[1].replace('"', '')
 
     url = userinfo_url + '?access_token=%s&fields=name,id,email' % token
     h = httplib2.Http()
@@ -93,7 +90,8 @@ def fbconnect():
     login_session['access_token'] = token
 
     # Get user picture
-    url = userinfo_url + '/picture?access_token=%s&redirect=0&height=200&width=200' % token
+    url = userinfo_url + '/picture'
+    url += '?access_token=%s&redirect=0&height=200&width=200' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     data = json.loads(result)
@@ -113,7 +111,8 @@ def fbconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;'
+    output += '-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
 
     flash("Now logged in as %s" % login_session['username'])
     return output
@@ -129,8 +128,8 @@ def fbdisconnect():
     )
 
     h = httplib2.Http()
-    result = h.request(url, 'DELETE')[1]
-    return "you have been logged out"
+    h.request(url, 'DELETE')[1]
+    return "You have been logged out"
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -221,7 +220,8 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;'
+    output += '-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print("done!")
     return output
@@ -282,10 +282,10 @@ def logout():
         del login_session['user_id']
         del login_session['provider']
         flash("You have successfully been logged out.")
-        return redirect(url_for('home'))
     else:
         flash("You were not logged in")
-        return redirect(url_for('home'))
+
+    return redirect(url_for('home'))
 
 
 # Helper Functions
