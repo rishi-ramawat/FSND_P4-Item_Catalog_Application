@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+. "${DIR}"/lib/exitcheck.sh
+
+BLACK_ON_GREEN='\e[42m\e[30m'
+BLACK_ON_YELLOW='\e[43m\e[30m'
+BLACK_ON_RED='\e[41m\e[30m'
+COLOR_RESET='\e[0m'
+
+# Ensure .env file exists
+echo -e "\n${BLACK_ON_GREEN}-> Checking .env file...${COLOR_RESET}"
+if [ ! -e "$DIR"/../.env ]; then
+    echo -e "${BLACK_ON_RED}No .env file found. Creating from .env.example...${COLOR_RESET}"
+    cp "$DIR"/../.env.example "$DIR"/../.env
+    exitCheck $?
+    echo -e "${BLACK_ON_YELLOW}NOTE: Please review the .env file and configure any required parameters.${COLOR_RESET}"
+else
+    echo ".env file exists. Skipping create."
+    echo -e "${BLACK_ON_YELLOW}NOTE: Please review the .env.example file and ensure all required parameters are present in .env${COLOR_RESET}"
+fi
+
+# Install the project requirements
+echo -e "\n${BLACK_ON_GREEN}-> Installing/Upgrading project requirements...${COLOR_RESET}"
+pip3 install -U -r "${DIR}"/../requirements.txt
+exitCheck $?
