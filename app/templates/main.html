@@ -23,6 +23,25 @@
 </head>
 <body class="no-js">
     {% include "navbar.html" %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <section class="container">
+        <section class="row">
+            <section class="col-sm-12">
+                <div class="alert alert-info">
+                    <ul class="list-group">
+                        {% for message in messages %}
+                        <li class="list-group-item">
+                            <strong>{{ message }}</strong>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+        </section>
+    </section>
+    {% endif %}
+    {% endwith %}
     {% block content %}
     {% endblock %}
     <footer class="container text-center">
