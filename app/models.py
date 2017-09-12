@@ -4,7 +4,7 @@
 from config import engine
 from datetime import datetime
 from sqlalchemy import (
-    Column, desc, ForeignKey, Integer, String, Text, TIMESTAMP
+    Column, ForeignKey, Integer, String, Text, TIMESTAMP
 )
 from sqlalchemy.sql.functions import current_timestamp
 from sqlalchemy.ext.declarative import declarative_base
@@ -35,7 +35,7 @@ class User(Base):
     )
     categories = relationship(
         'Category',
-        order_by=desc('Category.created_at'),
+        order_by='desc(Category.created_at)',
         backref='user'
     )
 
@@ -62,7 +62,7 @@ class Category(Base):
     slug = Column(String(100), nullable=False, unique=True)
     menu_items = relationship(
         'MenuItem',
-        order_by=desc('MenuItem.created_at'),
+        order_by='desc(MenuItem.created_at)',
         backref='category'
     )
     created_at = Column(
