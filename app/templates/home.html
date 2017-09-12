@@ -11,7 +11,10 @@
                     <ul class="list-group">
                         {% for m in menuItems %}
                         <li class="list-group-item">
-                            {{m.name}}  <span class="text-muted">({{m.category.name}})</span>
+                            <a href="{{url_for('showMenuItem', categorySlug=m.category.slug, menuSlug=m.slug)}}" class="plain-anchor">{{m.name}}</a>
+                            <span class="text-muted">
+                                (<a href="{{url_for('showMenuItemsInACategory', categorySlug=m.category.slug)}}" class="text-muted">{{m.category.name}}</a>)
+                            </span>
                         </li>
                         {% endfor %}
                     </ul>

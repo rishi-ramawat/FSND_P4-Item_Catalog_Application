@@ -1,0 +1,14 @@
+@media print {
+    .container {
+        width: auto;
+    }
+}
+
+.plain-anchor,
+.plain-anchor:hover,
+.plain-anchor:link,
+.plain-anchor:active {
+    outline: none;
+    text-decoration: inherit;
+    color: inherit;
+}
