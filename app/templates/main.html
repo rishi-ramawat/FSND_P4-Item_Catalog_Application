@@ -13,7 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"> </script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="" >
+    <link rel="stylesheet" href="{{url_for('static', filename='css/simple-sidebar.css')}}">
     <!-- jQuery -->
     <script
         src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -23,35 +23,46 @@
 </head>
 <body class="no-js">
     {% include "navbar.html" %}
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <section class="container">
-        <section class="row">
-            <section class="col-sm-12">
-                <div class="alert alert-info">
-                    <ul class="list-group">
-                        {% for message in messages %}
-                        <li class="list-group-item">
-                            <strong>{{ message }}</strong>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </section>
-        </section>
-    </section>
-    {% endif %}
-    {% endwith %}
+    <div id="wrapper">
+        {% include "sidebar.html" %}
+        <div id="page-content-wrapper">
+            {% with messages = get_flashed_messages() %}
+            <header class="container">
+            {% if messages %}
+                <section class="row">
+                    <section class="col-sm-12">
+                        <div class="alert alert-info">
+                            <ul class="list-group">
+                                {% for message in messages %}
+                                <li class="list-group-item">
+                                    <strong>{{ message }}</strong>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </section>
+                </section>
+            {% endif %}
+            </header>
+            {% endwith %}
     {% block content %}
     {% endblock %}
-    <footer class="container text-center">
+    <footer class="container text-center text-wrap">
         <span class="text-muted">Copyright &copy; 2017 by Rishi Ramawat. All Rights Reserved. Yes All of Them...</span>
     </footer>
+    </div>
+    </div>
     <!-- Bootstrap JS -->
     <script
         src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
         crossorigin="anonymous">
+    </script>
+    <script>
+        $("#menu-toggle").click(function(e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+        });
     </script>
 </body>
 </html>

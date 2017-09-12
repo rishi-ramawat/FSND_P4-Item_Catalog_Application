@@ -28,11 +28,17 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template('main.html')
+    """Show main landing page."""
+    if 'categories' not in login_session:
+        categories = session.query(Category).order_by(Category.name).all()
+        login_session['categories'] = [c.serialize for c in categories]
 
 
 @app.route('/login', methods=['GET'])
 def login():
+    if 'categories' not in login_session:
+        categories = session.query(Category).order_by(Category.name).all()
+        login_session['categories'] = [c.serialize for c in categories]
     state = ''.join(
         random.choice(string.ascii_uppercase + string.digits)
         for x in range(32)
