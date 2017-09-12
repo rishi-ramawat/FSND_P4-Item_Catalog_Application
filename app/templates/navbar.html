@@ -1,4 +1,4 @@
-<nav class="navbar navbar-inverse">
+<nav class="navbar navbar-inverse" style="margin-bottom: 0px; border-radius: 0px;">
     <div class="container">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">Catalogue App</a>
@@ -13,14 +13,14 @@
                     <button
                         class="btn btn-danger navbar-btn"
                         type="submit">
-                            <span class="glyphicon glyphicon-log-in"></span> Login
+                            <span class="glyphicon glyphicon-log-in"></span>&nbsp;&nbsp;Login
                     </button>
                 </form>
             {% else %}
                 <form method="POST" action="{{url_for('logout')}}">
                     <button
                         class="btn btn-danger navbar-btn"
-                        type="submit">Logout <span class="glyphicon glyphicon-log-out"></span>
+                        type="submit">Logout&nbsp;&nbsp;<span class="glyphicon glyphicon-log-out"></span>
                     </button>
                 </form>
             {% endif %}
