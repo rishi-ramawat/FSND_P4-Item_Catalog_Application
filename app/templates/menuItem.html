@@ -1,0 +1,24 @@
+{% extends "main.html" %}
+{% block content %}
+<main class="page-content-wrapper">
+    <br><br><br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h3>{{menuItem.name}}</h3></div>
+                    <div class="panel-body">
+                        <p>
+                        {% if menuItem.description %}
+                            {{menuItem.description}}
+                        {% else %}
+                            No description provided for this item.
+                        {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

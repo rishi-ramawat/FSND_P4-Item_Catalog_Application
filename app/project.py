@@ -11,7 +11,8 @@ import json
 from models import Base, Category, MenuItem, User
 from oauth2client.client import OAuth2WebServerFlow, FlowExchangeError
 import string
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import desc
+from sqlalchemy.orm import joinedload, sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 import random
 import requests
@@ -32,6 +33,63 @@ def home():
     if 'categories' not in login_session:
         categories = session.query(Category).order_by(Category.name).all()
         login_session['categories'] = [c.serialize for c in categories]
+
+    menuItems = session.query(MenuItem).options(
+        joinedload(MenuItem.category)
+    ).order_by(desc(MenuItem.created_at)).limit(10).all()
+
+    return render_template('home.html', menuItems=menuItems)
+
+
+@app.route('/catalogue/<string:categorySlug>/items')
+def showMenuItemsInACategory(categorySlug):
+    try:
+        category = session.query(Category).filter_by(
+            slug=categorySlug
+        ).options(joinedload(Category.menu_items)).one()
+    except NoResultFound:
+        abort(404)
+    if category in emptyValues:
+        '''
+            This is necessary because while using 'sqlite'
+            'NoResultFound' is not thrown for some reason.
+        '''
+        abort(404)
+
+    return render_template(
+        'category.html',
+        category=category,
+        numberOfItems=len(category.menu_items)
+    )
+
+
+@app.route('/catalogue/<string:categorySlug>/<string:menuSlug>')
+def showMenuItem(categorySlug, menuSlug):
+    category = None
+    try:
+        category = session.query(Category).filter_by(
+            slug=categorySlug
+        ).one()
+    except NoResultFound:
+        print("NoResultFound for category slug: {}".format(categorySlug))
+        abort(404)
+
+    if category in emptyValues:
+        abort(404)
+
+    try:
+        menuItem = session.query(MenuItem).filter_by(
+            category_id=category.id,
+            slug=menuSlug
+        ).one()
+    except NoResultFound:
+        print("NoResultFound for menu slug: {}".format(categorySlug))
+        abort(404)
+
+    if menuItem in emptyValues:
+        abort(404)
+
+    return render_template('menuItem.html', menuItem=menuItem)
 
 
 @app.route('/login', methods=['GET'])

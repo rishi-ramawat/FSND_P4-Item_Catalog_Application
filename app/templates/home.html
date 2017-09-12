@@ -1,0 +1,24 @@
+{% extends "main.html" %}
+{% block content %}
+<main class="page-content-wrapper">
+    <div class="container">
+        <div class="row">
+            <section class="col-md-6">
+                <header>
+                    <h3>Latest Items</h3>
+                </header>
+                <main>
+                    <ul class="list-group">
+                        {% for m in menuItems %}
+                        <li class="list-group-item">
+                            {{m.name}}  <span class="text-muted">({{m.category.name}})</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </main>
+            </section>
+            <section class="col-md-6"></section>
+        </div>
+    </div>
+</main>
+{% endblock %}
