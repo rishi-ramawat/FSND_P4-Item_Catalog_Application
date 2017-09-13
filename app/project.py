@@ -6,6 +6,7 @@ from flask import (
     Flask, abort, redirect, render_template, make_response,
     request, url_for, flash, jsonify, session as login_session
 )
+from functools import wraps
 import httplib2
 import json
 from models import Base, Category, MenuItem, User
@@ -25,6 +26,16 @@ session = DBSession()
 emptyValues = [None, False, "", []]
 
 app = Flask(__name__)
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'username' not in login_session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+
+    return decorated
 
 
 @app.route('/')
