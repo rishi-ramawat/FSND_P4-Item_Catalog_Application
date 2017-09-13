@@ -58,13 +58,13 @@ def showMenuItemsInACategory(categorySlug):
         category = session.query(Category).filter_by(
             slug=categorySlug
         ).options(joinedload(Category.menu_items)).one()
+        if category in emptyValues:
+            """
+                This is necessary because while using 'sqlite'
+                'NoResultFound' is not thrown by the orm for some reason.
+            """
+            raise NoResultFound
     except NoResultFound:
-        abort(404)
-    if category in emptyValues:
-        '''
-            This is necessary because while using 'sqlite'
-            'NoResultFound' is not thrown for some reason.
-        '''
         abort(404)
 
     return render_template(
@@ -74,33 +74,145 @@ def showMenuItemsInACategory(categorySlug):
     )
 
 
-@app.route('/catalogue/<string:categorySlug>/<string:menuSlug>')
-def showMenuItem(categorySlug, menuSlug):
-    category = None
+@app.route('/catalogue/<string:categorySlug>', methods=['GET', 'POST'])
+@requires_auth
+def addMenuItemToACategory(categorySlug):
     try:
         category = session.query(Category).filter_by(
             slug=categorySlug
         ).one()
+        if category in emptyValues:
+            """
+                This is necessary because while using 'sqlite'
+                'NoResultFound' is not thrown by the orm for some reason.
+            """
+            raise NoResultFound
     except NoResultFound:
-        print("NoResultFound for category slug: {}".format(categorySlug))
         abort(404)
 
-    if category in emptyValues:
-        abort(404)
+    if request.method == 'GET':
+        return render_template(
+            'addMenuItem.html',
+            category=category
+        )
+    else:
+        formValues = {
+            key: value.strip(" \t\n\r") for key, value in request.form.items()
+        }
+        name = formValues.get('name', None)
+        slug = formValues.get('slug', None)
 
-    try:
-        menuItem = session.query(MenuItem).filter_by(
+        if (name in emptyValues) or (slug in emptyValues):
+            abort(400)
+
+        menuItem = MenuItem(
+            name=name,
+            slug=slug,
             category_id=category.id,
-            slug=menuSlug
-        ).one()
+            description=formValues.get('description', None)
+        )
+
+        session.add(menuItem)
+        session.commit()
+        flash('Menu Item: %s was added' % menuItem.name)
+
+        return redirect(url_for(
+            'showMenuItemsInACategory',
+            categorySlug=categorySlug
+        ))
+
+
+@app.route('/catalogue/<string:categorySlug>/<string:menuSlug>')
+def showMenuItem(categorySlug, menuSlug):
+    try:
+        menuItem = getMenuItem(categorySlug, menuSlug)
     except NoResultFound:
-        print("NoResultFound for menu slug: {}".format(categorySlug))
         abort(404)
 
-    if menuItem in emptyValues:
+    return render_template(
+        'menuItem.html',
+        menuItem=menuItem,
+        categorySlug=categorySlug
+    )
+
+
+@app.route(
+    '/catalogue/<string:categorySlug>/<string:menuSlug>/edit',
+    methods=['GET', 'POST', 'PUT']
+)
+@requires_auth
+def editMenuItem(categorySlug, menuSlug):
+    try:
+        menuItem = getMenuItem(categorySlug, menuSlug)
+    except NoResultFound:
         abort(404)
 
-    return render_template('menuItem.html', menuItem=menuItem)
+    if request.method == 'GET':
+        return render_template(
+            'editMenuItem.html',
+            menuItem=menuItem,
+            categorySlug=menuItem.category.slug
+        )
+    elif (
+        (request.method == 'PUT') or
+        (request.form.get('_method', None) == 'PUT')
+    ):
+        formValues = {
+            key: value.strip(" \t\n\r") for key, value in request.form.items()
+        }
+        name = formValues.get('name', None)
+        slug = formValues.get('slug', None)
+
+        if (name in emptyValues) or (slug in emptyValues):
+            abort(400)
+
+        menuItem.name = name
+        menuItem.slug = slug
+        menuItem.description = formValues.get('description', None)
+        session.add(menuItem)
+        session.commit()
+        flash('Menu Item: %s was edited' % menuItem.name)
+    else:
+        abort(405)
+
+    return redirect(url_for(
+        'showMenuItem',
+        categorySlug=categorySlug,
+        menuSlug=menuSlug
+    ))
+
+
+@app.route(
+    '/catalogue/<string:categorySlug>/<string:menuSlug>/delete',
+    methods=['GET', 'POST', 'DELETE']
+)
+@requires_auth
+def deleteMenuItem(categorySlug, menuSlug):
+    try:
+        menuItem = getMenuItem(categorySlug, menuSlug)
+    except NoResultFound:
+        abort(404)
+
+    if request.method == 'GET':
+        return render_template(
+            'deleteMenuItem.html',
+            menuItem=menuItem,
+            categorySlug=menuItem.category.slug
+        )
+    elif (
+        (request.method == 'DELETE') or
+        (request.form.get('_method', None) == 'DELETE')
+    ):
+        session.delete(menuItem)
+        session.commit()
+        flash('Menu Item: %s was deleted' % menuItem.name)
+    else:
+        abort(405)
+
+    return redirect(url_for(
+        'showMenuItemsInACategory',
+        categorySlug=categorySlug
+    ))
 
 
 @app.route('/login', methods=['GET'])

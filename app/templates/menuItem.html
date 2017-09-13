@@ -16,6 +16,12 @@
                         {% endif %}
                         </p>
                     </div>
+                    {% if 'username' in session %}
+                    <div class="panel-footer">
+                        <a class="btn btn-info" href="{{url_for('editMenuItem', categorySlug=categorySlug, menuSlug=menuItem.slug)}}">Edit</a>
+                        <a class="btn btn-danger" href="{{url_for('deleteMenuItem', categorySlug=categorySlug, menuSlug=menuItem.slug)}}">Delete</a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

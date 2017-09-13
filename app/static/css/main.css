@@ -12,3 +12,7 @@
     text-decoration: inherit;
     color: inherit;
 }
+
+.list-group-item:hover {
+    background-color: #ddd;
+}

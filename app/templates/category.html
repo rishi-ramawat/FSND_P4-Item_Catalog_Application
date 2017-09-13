@@ -2,19 +2,25 @@
 {% block content %}
 <main class="page-content-wrapper">
     <div class="container">
+        {% if 'username' in session %}
+        <br>
+        <div class="row">
+            <div class="col-md-12">
+                <a href="{{url_for('addMenuItemToACategory', categorySlug=category.slug)}}">Add Item</a>
+            </div>
+        </div>
+        {% endif %}
         <div class="row">
             <section class="col-md-6">
                 <header>
                     <h3>{{category.name}} Items ({{numberOfItems}} Items)</h3>
                 </header>
                 <main>
-                    <ul class="list-group">
+                    <div class="list-group">
                         {% for m in category.menu_items %}
-                        <li class="list-group-item">
-                            <a href="{{url_for('showMenuItem', categorySlug=category.slug, menuSlug=m.slug)}}" class="plain-anchor">{{m.name}}</a>
-                        </li>
+                        <a class="list-group-item" href="{{url_for('showMenuItem', categorySlug=category.slug, menuSlug=m.slug)}}">{{m.name}}</a>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </main>
             </section>
             <section class="col-md-6"></section>
