@@ -352,6 +352,71 @@ def logout():
     return redirect(url_for('home'))
 
 
+# JSON API Routes
+
+@app.route('/catalogue.json')
+def getAllItemsInCatalogue():
+    try:
+        categories = session.query(Category).options(
+            joinedload(Category.menu_items)
+        ).order_by(desc(Category.created_at)).all()
+
+        if categories in emptyValues:
+            raise NoResultFound
+    except NoResultFound:
+        response = {
+            'message': 'No Categories found in the system.'
+        }
+        return jsonify(response), 400
+    response = []
+    for category in categories:
+        menuItems = [m.serialize for m in category.menu_items]
+        category = category.serialize
+        category['menu_items'] = menuItems
+        response.append(category)
+
+    return jsonify(categories=response)
+
+
+@app.route('/catalogue.json/<string:categorySlug>')
+def getCategoryJSON(categorySlug):
+    try:
+        category = session.query(Category).filter_by(
+            slug=categorySlug
+        ).options(
+            joinedload(Category.menu_items)
+        ).one()
+
+        if category in emptyValues:
+            raise NoResultFound
+    except NoResultFound:
+        response = {
+            'message': "No Category %s found in the system." % categorySlug
+        }
+
+        return jsonify(response), 400
+
+    menuItems = [m.serialize for m in category.menu_items]
+    response = category.serialize
+    response['menu_items'] = menuItems
+
+    return jsonify(category=response)
+
+
+@app.route('/catalogue.json/<string:categorySlug>/<string:menuSlug>')
+def showMenuItemJSON(categorySlug, menuSlug):
+    try:
+        menuItem = getMenuItem(categorySlug, menuSlug)
+    except NoResultFound:
+        response = {
+            'message': 'No result found.'
+        }
+
+        return jsonify(response), 404
+
+    return jsonify(menu_item=menuItem.serialize)
+
+
 # Helper Functions
 
 
@@ -374,6 +439,17 @@ def getUserID(email):
         return user.id
     except NoResultFound:
         return None
+
+
+def getMenuItem(categorySlug, menuSlug):
+    menuItem = session.query(MenuItem).filter_by(
+        slug=menuSlug
+    ).options(joinedload(MenuItem.category)).one()
+
+    if menuItem in emptyValues or menuItem.category.slug != categorySlug:
+        raise NoResultFound
+
+    return menuItem
 
 
 if __name__ == '__main__':
