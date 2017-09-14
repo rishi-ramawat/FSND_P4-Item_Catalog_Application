@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
 
-from config import engine
+from config import (
+    engine, USER_EMAIL_FOR_DB_SEEDS, USER_NAME_FOR_DB_SEEDS
+)
 from models import Base, Category, MenuItem, User
 from sqlalchemy.orm import sessionmaker
 
@@ -21,8 +23,8 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 user1 = User(
-    name='Rishi Ramawat',
-    email='rishi.ramawat@gmail.com'
+    name=USER_NAME_FOR_DB_SEEDS,
+    email=USER_EMAIL_FOR_DB_SEEDS
 )
 
 session.add(user1)

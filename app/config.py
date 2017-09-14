@@ -24,9 +24,14 @@ FB_APP_ID = os.environ.get('FB_APP_ID')
 FB_APP_SECRET = os.environ.get('FB_APP_SECRET')
 FB_VERSION = os.environ.get('FB_VERSION', 'v2.10')
 
+# App Config
 APP_HOST = os.environ.get('APP_HOST', '0.0.0.0')
 APP_PORT = int(os.environ.get('APP_PORT', 8000))
 APP_SECRET_KEY = os.environ.get('APP_SECRET_KEY', 'super_secret_key')
+# Username used in Database Seeds @see app/seeds.py
+USER_NAME_FOR_DB_SEEDS = os.environ.get('USER_NAME_FOR_DB_SEEDS')
+# Email Id used in Database Seeds @see app/seeds.py
+USER_EMAIL_FOR_DB_SEEDS = os.environ.get('USER_EMAIL_FOR_DB_SEEDS')
 
 engine = None
 if DB_CONNECTION == 'sqlite':
