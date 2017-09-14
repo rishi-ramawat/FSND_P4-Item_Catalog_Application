@@ -90,6 +90,9 @@ def addMenuItemToACategory(categorySlug):
     except NoResultFound:
         abort(404)
 
+    if login_session['user_id'] != category.user_id:
+        abort(403)
+
     if request.method == 'GET':
         return render_template(
             'addMenuItem.html',
@@ -147,6 +150,9 @@ def editMenuItem(categorySlug, menuSlug):
     except NoResultFound:
         abort(404)
 
+    if login_session['user_id'] != menuItem.category.user_id:
+        abort(403)
+
     if request.method == 'GET':
         return render_template(
             'editMenuItem.html',
@@ -192,6 +198,9 @@ def deleteMenuItem(categorySlug, menuSlug):
         menuItem = getMenuItem(categorySlug, menuSlug)
     except NoResultFound:
         abort(404)
+
+    if login_session['user_id'] != menuItem.category.user_id:
+        abort(403)
 
     if request.method == 'GET':
         return render_template(

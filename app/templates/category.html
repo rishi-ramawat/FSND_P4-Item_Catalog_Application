@@ -2,11 +2,11 @@
 {% block content %}
 <main class="page-content-wrapper">
     <div class="container">
-        {% if 'username' in session %}
+        {% if 'username' in session and session['user_id'] == category.user_id %}
         <br>
         <div class="row">
             <div class="col-md-12">
-                <a href="{{url_for('addMenuItemToACategory', categorySlug=category.slug)}}">Add Item</a>
+                <a href="{{url_for('addMenuItemToACategory', categorySlug=category.slug)}}">Add Item to {{category.name}}</a>
             </div>
         </div>
         {% endif %}
